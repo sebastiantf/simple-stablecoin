@@ -209,6 +209,13 @@ contract SSDTest is Test {
         vm.stopPrank();
     }
 
+    function test_redeemCollateralRevertsIfUnsupported() public {
+        ERC20Mock unsupported = new ERC20Mock();
+        uint256 redeemAmount = 0.25 ether;
+        vm.expectRevert(SimpleStablecoinSystem.UnsupportedCollateral.selector);
+        sss.redeemCollateral(address(unsupported), redeemAmount);
+    }
+
     function test_redeemCollateralRevertsIfInsufficientHealthFactor() public {
         vm.startPrank(alice);
 

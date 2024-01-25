@@ -70,7 +70,7 @@ contract SimpleStablecoinSystem {
         emit SSDMinted(msg.sender, _amount);
     }
 
-    function redeemCollateral(address _collateral, uint256 _amount) external {
+    function redeemCollateral(address _collateral, uint256 _amount) external onlySupportedCollateral(_collateral) {
         collateralBalances[msg.sender][_collateral] -= _amount;
         _revertIfInsufficientHealthFactor(msg.sender);
         IERC20(_collateral).safeTransfer(msg.sender, _amount);
