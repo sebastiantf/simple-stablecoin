@@ -117,6 +117,12 @@ contract SSDTest is Test {
         vm.stopPrank();
     }
 
+    function test_mintSSDRevertsIfZero() public {
+        uint256 ssdAmount = 0;
+        vm.expectRevert(SimpleStablecoinSystem.MustBeGreaterThanZero.selector);
+        sss.mintSSD(ssdAmount);
+    }
+
     function test_mintSSDRevertsIfInsufficientHealthFactor() public {
         vm.startPrank(alice);
 

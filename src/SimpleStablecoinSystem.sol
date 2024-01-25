@@ -63,7 +63,7 @@ contract SimpleStablecoinSystem {
         emit CollateralDeposited(msg.sender, _collateral, _amount);
     }
 
-    function mintSSD(uint256 _amount) external {
+    function mintSSD(uint256 _amount) external GreaterThanZero(_amount) {
         ssdMinted[msg.sender] += _amount;
         _revertIfInsufficientHealthFactor(msg.sender);
         ssd.mint(msg.sender, _amount);
