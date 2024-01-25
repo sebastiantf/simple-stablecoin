@@ -10,6 +10,8 @@ contract SimpleStablecoinSystem {
     error MustBeGreaterThanZero();
     error UnsupportedCollateral();
 
+    event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
+
     mapping(address collateral => bool isSupported) public supportedCollaterals;
     mapping(address user => mapping(address collateral => uint256 collateralBalance)) internal collateralBalances;
 
@@ -40,6 +42,7 @@ contract SimpleStablecoinSystem {
     {
         collateralBalances[msg.sender][_collateral] += _amount;
         IERC20(_collateral).safeTransferFrom(msg.sender, address(this), _amount);
+        emit CollateralDeposited(msg.sender, _collateral, _amount);
     }
 
     function collateralBalanceOf(address _user, address _collateral) public view returns (uint256) {

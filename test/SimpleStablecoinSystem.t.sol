@@ -6,6 +6,8 @@ import {SimpleStablecoinSystem} from "../src/SimpleStablecoinSystem.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 
 contract SSDTest is Test {
+    event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
+
     SimpleStablecoinSystem public sss;
     ERC20Mock public weth = new ERC20Mock();
 
@@ -36,6 +38,8 @@ contract SSDTest is Test {
         // deposit collateral
         uint256 collateralAmount = 0.5 ether;
         weth.approve(address(sss), collateralAmount);
+        vm.expectEmit(true, true, true, true);
+        emit CollateralDeposited(alice, address(weth), collateralAmount);
         sss.depositCollateral(address(weth), collateralAmount);
 
         // final balances
