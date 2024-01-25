@@ -32,8 +32,8 @@ contract SSDTest is Test {
         assertEq(address(sss.ssd()), address(ssd));
     }
 
-    function test_supportedCollaterals() public {
-        assertEq(sss.supportedCollaterals(address(weth)), true);
+    function test_isCollateralSupported() public {
+        assertEq(sss.isCollateralSupported(address(weth)), true);
     }
 
     /* depositCollateral() */
