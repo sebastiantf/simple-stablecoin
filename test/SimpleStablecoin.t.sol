@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {SimpleStablecoin} from "../src/SSD.sol";
+import {SimpleStablecoin} from "../src/SimpleStablecoin.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract SSDTest is Test {
