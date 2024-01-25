@@ -98,6 +98,11 @@ contract SSDTest is Test {
         assertEq(sss.ssdMintedOf(alice), 0);
         assertEq(ssd.balanceOf(alice), 0);
 
+        // deposit collateral
+        uint256 collateralAmount = 0.5 ether;
+        weth.approve(address(sss), collateralAmount);
+        sss.depositCollateral(address(weth), collateralAmount);
+
         // mint SSD
         uint256 ssdAmount = 100;
         vm.expectEmit(true, true, true, true);
