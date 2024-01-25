@@ -3,6 +3,7 @@ pragma solidity 0.8.20;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {AggregatorV3Interface} from "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
 import {SimpleStablecoin} from "./SimpleStablecoin.sol";
 
@@ -75,5 +76,14 @@ contract SimpleStablecoinSystem {
         // 3. get total SSD minted
         // 4. get value of total SSD minted in USD
         // health factor = (total collateral value in USD * liquidation threshold) / (total SSD value in USD)
+    }
+
+    function valueInUSD(address token, uint256 amount) public view returns (uint256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(priceFeeds[token]);
+        (, int256 price,,,) = priceFeed.latestRoundData();
+        // USD price feed has 8 decimals
+        // We scale it to 18 decimals: 1e8 * 1e10 / 1e18 = 1e18
+        // TODO: generalize precision
+        return ((uint256(price) * 1e10) * amount) / 1e18;
     }
 }
