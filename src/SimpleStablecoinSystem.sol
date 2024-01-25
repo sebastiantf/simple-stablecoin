@@ -17,6 +17,7 @@ contract SimpleStablecoinSystem {
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
     event CollateralRedeemed(address indexed user, address indexed collateral, uint256 amount);
     event SSDMinted(address indexed user, uint256 amount);
+    event SSDBurned(address indexed user, uint256 amount);
 
     // Liquidation threshold is 80%
     // If loan value raises above 80% of collateral value, the loan can be liquidated
@@ -75,6 +76,13 @@ contract SimpleStablecoinSystem {
         _revertIfInsufficientHealthFactor(msg.sender);
         IERC20(_collateral).safeTransfer(msg.sender, _amount);
         emit CollateralRedeemed(msg.sender, _collateral, _amount);
+    }
+
+    function burnSSD(uint256 _amount) external GreaterThanZero(_amount) {
+        ssdMinted[msg.sender] -= _amount;
+        _revertIfInsufficientHealthFactor(msg.sender); // probably not needed
+        ssd.burnFrom(msg.sender, _amount);
+        emit SSDBurned(msg.sender, _amount);
     }
 
     function collateralBalanceOf(address _user, address _collateral) public view returns (uint256) {

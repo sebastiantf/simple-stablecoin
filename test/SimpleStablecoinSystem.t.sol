@@ -11,6 +11,7 @@ contract SSDTest is Test {
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
     event CollateralRedeemed(address indexed user, address indexed collateral, uint256 amount);
     event SSDMinted(address indexed user, uint256 amount);
+    event SSDBurned(address indexed user, uint256 amount);
 
     SimpleStablecoin public ssd;
     SimpleStablecoinSystem public sss;
@@ -237,5 +238,38 @@ contract SSDTest is Test {
         sss.redeemCollateral(address(weth), redeemAmount);
 
         vm.stopPrank();
+    }
+
+    /* burnSSD() */
+    function test_burnSSD() public {
+        vm.startPrank(alice);
+
+        // deposit collateral
+        uint256 collateralAmount = 0.5 ether;
+        weth.approve(address(sss), collateralAmount);
+        sss.depositCollateral(address(weth), collateralAmount);
+
+        // mint SSD
+        uint256 ssdAmount = 100;
+        sss.mintSSD(ssdAmount);
+
+        // burn SSD
+        uint256 burnAmount = 50;
+        ssd.approve(address(sss), burnAmount);
+        vm.expectEmit(true, true, true, true);
+        emit SSDBurned(alice, burnAmount);
+        sss.burnSSD(burnAmount);
+
+        // final balances
+        assertEq(sss.ssdMintedOf(alice), 50);
+        assertEq(ssd.balanceOf(alice), 50);
+
+        vm.stopPrank();
+    }
+
+    function test_burnSSDRevertsIfZero() public {
+        uint256 burnAmount = 0;
+        vm.expectRevert(SimpleStablecoinSystem.MustBeGreaterThanZero.selector);
+        sss.burnSSD(burnAmount);
     }
 }
