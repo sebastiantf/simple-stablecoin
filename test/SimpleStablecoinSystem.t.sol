@@ -19,6 +19,7 @@ contract SSDTest is Test {
     MockV3Aggregator public mockV3AggregatorWeth = new MockV3Aggregator();
 
     address alice = makeAddr("alice");
+    address bob = makeAddr("bob");
 
     function setUp() public {
         address[] memory collaterals = new address[](1);
@@ -301,5 +302,57 @@ contract SSDTest is Test {
         sss.liquidate(alice, address(weth), liquidateAmount);
 
         vm.stopPrank();
+    }
+
+    function test_liquidate() public {
+        vm.startPrank(alice);
+
+        // deposit collateral
+        uint256 collateralAmount = 1 ether;
+        weth.approve(address(sss), collateralAmount);
+        sss.depositCollateral(address(weth), collateralAmount);
+        assertEq(sss.totalCollateralValueInUSD(alice), 2000e18); // 2000 USD
+        // mint SSD - 2000 * 80% = 1600
+        uint256 ssdAmount = 1600e18;
+        sss.mintSSD(ssdAmount);
+
+        // health factor = 2000 * 80% / 1600 = 1
+        assertEq(sss.healthFactor(alice), 1e18);
+
+        // decrease ETH price to 1700 USD
+        mockV3AggregatorWeth.setPrice(1700e8);
+
+        // health factor = 1700 * 80% / 1600 = 0.85e18
+        uint256 newHealthFactor = sss.healthFactor(alice);
+        assertEq(newHealthFactor, 0.85e18);
+
+        // TODO: improve calculation. this doesn't make health factor 1
+        // 1700 * 80% / x = 1
+        // x = 1700 * 80% / 1 = 1360
+        // 1600 - 1360 = 240 SSD needs to be burned
+        // 240 / 1700 = 0.1411764706 ETH needs to be liquidated
+        // 0.1411764706 + 5% = 0.1482352941 ETH will be liquidated including bonus
+        uint256 ssdValueInCollateral = sss.tokenFromUSD(address(weth), 240e18);
+        uint256 liquidationBonus = (ssdValueInCollateral * sss.LIQUIDATION_BONUS()) / sss.LIQUIDATION_PRECISION();
+        ssdValueInCollateral += liquidationBonus;
+
+        // liquidate
+        uint256 liquidateAmount = 240e18;
+        // transfer liquidateAmount SSD from alice to bob, only for testing because we can't mint SSD
+        ssd.transfer(bob, liquidateAmount);
+        vm.stopPrank();
+
+        vm.startPrank(bob);
+        ssd.approve(address(sss), liquidateAmount);
+        sss.liquidate(alice, address(weth), liquidateAmount);
+        vm.stopPrank();
+
+        // final balances
+        assertGt(sss.healthFactor(alice), newHealthFactor); // improves health factor
+        assertEq(sss.collateralBalanceOf(alice, address(weth)), collateralAmount - ssdValueInCollateral);
+        assertEq(weth.balanceOf(alice), 0);
+        assertEq(weth.balanceOf(address(sss)), collateralAmount - ssdValueInCollateral);
+        assertEq(sss.ssdMintedOf(alice), ssdAmount - liquidateAmount);
+        assertEq(ssd.balanceOf(alice), ssdAmount - liquidateAmount); // because we transferred 240 SSD to bob
     }
 }

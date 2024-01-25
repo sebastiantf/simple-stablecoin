@@ -19,10 +19,12 @@ contract SimpleStablecoinSystem {
     event CollateralRedeemed(address indexed user, address indexed collateral, uint256 amount);
     event SSDMinted(address indexed user, uint256 amount);
     event SSDBurned(address indexed user, uint256 amount);
+    event Liquidated(address indexed user, address indexed collateral, uint256 collateralAmount, uint256 ssdAmount);
 
     // Liquidation threshold is 80%
     // If loan value raises above 80% of collateral value, the loan can be liquidated
     uint256 public constant LIQUIDATION_THRESHOLD = 80;
+    uint256 public constant LIQUIDATION_BONUS = 5;
     uint256 public constant LIQUIDATION_PRECISION = 100;
 
     SimpleStablecoin public ssd;
@@ -87,7 +89,30 @@ contract SimpleStablecoinSystem {
     }
 
     function liquidate(address _user, address _collateral, uint256 _ssdAmount) external {
-        if (healthFactor(_user) >= 1e18) revert SufficientHealthFactor();
+        uint256 currentHealthFactor = healthFactor(_user);
+        if (currentHealthFactor >= 1e18) revert SufficientHealthFactor();
+
+        // get SSD value in collateral
+        uint256 ssdValueInCollateral = tokenFromUSD(_collateral, _ssdAmount);
+        // add liquidation bonus
+        uint256 liquidationBonus = (ssdValueInCollateral * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
+        ssdValueInCollateral += liquidationBonus;
+
+        // redeem collateral from user
+        collateralBalances[_user][_collateral] -= ssdValueInCollateral;
+        IERC20(_collateral).safeTransfer(msg.sender, ssdValueInCollateral);
+        emit CollateralRedeemed(_user, _collateral, ssdValueInCollateral);
+
+        // burn SSD from liquidator
+        ssdMinted[_user] -= _ssdAmount;
+        ssd.burnFrom(msg.sender, _ssdAmount);
+        emit SSDBurned(_user, _ssdAmount);
+
+        // check health factor improved
+        uint256 newHealthFactor = healthFactor(_user);
+        if (newHealthFactor <= currentHealthFactor) revert InsufficientHealthFactor();
+
+        emit Liquidated(_user, _collateral, ssdValueInCollateral, _ssdAmount);
     }
 
     function collateralBalanceOf(address _user, address _collateral) public view returns (uint256) {
