@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
 import {SimpleStablecoin} from "../src/SSD.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract SSDTest is Test {
     SimpleStablecoin public ssd;
@@ -32,7 +33,7 @@ contract SSDTest is Test {
         assertEq(ssd.balanceOf(alice), 100);
 
         vm.startPrank(alice);
-        vm.expectRevert();
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, alice));
         ssd.mint(alice, 100);
         vm.stopPrank();
     }
