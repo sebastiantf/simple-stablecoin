@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.19;
+pragma solidity 0.8.20;
 
-contract SimpleStablecoin {
-  
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+contract SimpleStablecoin is ERC20 {
+    constructor() ERC20("SimpleStablecoin", "SSD") {}
 }
