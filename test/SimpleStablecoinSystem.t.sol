@@ -20,11 +20,15 @@ contract SSDTest is Test {
         collaterals[0] = address(weth);
 
         ssd = new SimpleStablecoin();
-        sss = new SimpleStablecoinSystem(collaterals);
+        sss = new SimpleStablecoinSystem(ssd, collaterals);
 
         ssd.transferOwnership(address(sss));
 
         weth.mint(alice, 1 ether);
+    }
+
+    function test_ssd() public {
+        assertEq(address(sss.ssd()), address(ssd));
     }
 
     function test_supportedCollaterals() public {
