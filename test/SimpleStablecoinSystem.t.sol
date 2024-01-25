@@ -51,4 +51,11 @@ contract SSDTest is Test {
         vm.expectRevert(SimpleStablecoinSystem.MustBeGreaterThanZero.selector);
         sss.depositCollateral(address(weth), collateralAmount);
     }
+
+    function test_depositCollateralRevertsIfUnsupported() public {
+        ERC20Mock unsupported = new ERC20Mock();
+        uint256 collateralAmount = 0.5 ether;
+        vm.expectRevert(SimpleStablecoinSystem.UnsupportedCollateral.selector);
+        sss.depositCollateral(address(unsupported), collateralAmount);
+    }
 }
