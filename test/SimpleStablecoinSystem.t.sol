@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {SimpleStablecoin} from "../src/SimpleStablecoin.sol";
 import {SimpleStablecoinSystem} from "../src/SimpleStablecoinSystem.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
+import {MockV3Aggregator} from "./mocks/MockV3Aggregator.sol";
 
 contract SSDTest is Test {
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
@@ -13,7 +14,7 @@ contract SSDTest is Test {
     SimpleStablecoin public ssd;
     SimpleStablecoinSystem public sss;
     ERC20Mock public weth = new ERC20Mock();
-    address mockV3Aggregator = makeAddr("mockV3Aggregator");
+    MockV3Aggregator public mockV3AggregatorWeth = new MockV3Aggregator();
 
     address alice = makeAddr("alice");
 
@@ -21,7 +22,7 @@ contract SSDTest is Test {
         address[] memory collaterals = new address[](1);
         address[] memory priceFeeds = new address[](1);
         collaterals[0] = address(weth);
-        priceFeeds[0] = address(mockV3Aggregator);
+        priceFeeds[0] = address(mockV3AggregatorWeth);
 
         ssd = new SimpleStablecoin();
         sss = new SimpleStablecoinSystem(ssd, collaterals, priceFeeds);
@@ -44,7 +45,7 @@ contract SSDTest is Test {
     }
 
     function test_priceFeeds() public {
-        assertEq(sss.priceFeeds(address(weth)), address(mockV3Aggregator));
+        assertEq(sss.priceFeeds(address(weth)), address(mockV3AggregatorWeth));
     }
 
     /* depositCollateral() */
@@ -103,5 +104,11 @@ contract SSDTest is Test {
         assertEq(ssd.balanceOf(alice), ssdAmount);
 
         vm.stopPrank();
+    }
+
+    /* valueInUSD() */
+    function test_valueInUSD() public {
+        assertEq(sss.valueInUSD(address(weth), 1 ether), 2000e18);
+        assertEq(sss.valueInUSD(address(weth), 0.5 ether), 1000e18);
     }
 }
