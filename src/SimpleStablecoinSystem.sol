@@ -65,14 +65,14 @@ contract SimpleStablecoinSystem {
 
     function mintSSD(uint256 _amount) external {
         ssdMinted[msg.sender] += _amount;
-        if (healthFactor(msg.sender) < 1e18) revert InsufficientHealthFactor();
+        _revertIfInsufficientHealthFactor(msg.sender);
         ssd.mint(msg.sender, _amount);
         emit SSDMinted(msg.sender, _amount);
     }
 
     function redeemCollateral(address _collateral, uint256 _amount) external {
         collateralBalances[msg.sender][_collateral] -= _amount;
-        if (healthFactor(msg.sender) < 1e18) revert InsufficientHealthFactor();
+        _revertIfInsufficientHealthFactor(msg.sender);
         IERC20(_collateral).safeTransfer(msg.sender, _amount);
         emit CollateralRedeemed(msg.sender, _collateral, _amount);
     }
@@ -114,5 +114,9 @@ contract SimpleStablecoinSystem {
         // We scale it to 18 decimals: 1e8 * 1e10 / 1e18 = 1e18
         // TODO: generalize precision
         return ((uint256(price) * 1e10) * amount) / 1e18;
+    }
+
+    function _revertIfInsufficientHealthFactor(address _user) internal view {
+        if (healthFactor(_user) < 1e18) revert InsufficientHealthFactor();
     }
 }
