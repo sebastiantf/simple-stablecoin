@@ -71,11 +71,22 @@ contract SimpleStablecoinSystem {
     }
 
     function healthFactor(address user) public view returns (uint256) {
-        // 1. get total collateral deposited
-        // 2. get value of total collateral deposited in USD
+        // 1. get total collateral deposited in USD
+        uint256 totalCollateralValueInUSD = totalCollateralValueInUSD(user);
         // 3. get total SSD minted
         // 4. get value of total SSD minted in USD
         // health factor = (total collateral value in USD * liquidation threshold) / (total SSD value in USD)
+    }
+
+    function totalCollateralValueInUSD(address user) public view returns (uint256) {
+        uint256 totalCollateralValueInUSD;
+        for (uint256 i = 0; i < supportedCollaterals.length; i++) {
+            address collateral = supportedCollaterals[i];
+            uint256 collateralBalance = collateralBalances[user][collateral];
+            uint256 collateralValueInUSD = valueInUSD(collateral, collateralBalance);
+            totalCollateralValueInUSD += collateralValueInUSD;
+        }
+        return totalCollateralValueInUSD;
     }
 
     function valueInUSD(address token, uint256 amount) public view returns (uint256) {

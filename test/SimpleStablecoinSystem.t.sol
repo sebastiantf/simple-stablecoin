@@ -111,4 +111,25 @@ contract SSDTest is Test {
         assertEq(sss.valueInUSD(address(weth), 1 ether), 2000e18);
         assertEq(sss.valueInUSD(address(weth), 0.5 ether), 1000e18);
     }
+
+    /* totalCollateralValueInUSD() */
+    function test_totalCollateralValueInUSD() public {
+        vm.startPrank(alice);
+
+        // deposit collateral
+        uint256 collateralAmount = 0.5 ether;
+        weth.approve(address(sss), collateralAmount);
+        sss.depositCollateral(address(weth), collateralAmount);
+
+        assertEq(sss.totalCollateralValueInUSD(alice), 1000e18);
+
+        // deposit more collateral
+        collateralAmount = 0.5 ether;
+        weth.approve(address(sss), collateralAmount);
+        sss.depositCollateral(address(weth), collateralAmount);
+
+        assertEq(sss.totalCollateralValueInUSD(alice), 2000e18);
+
+        vm.stopPrank();
+    }
 }
