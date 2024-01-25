@@ -202,4 +202,27 @@ contract SSDTest is Test {
 
         vm.stopPrank();
     }
+
+    function test_redeemCollateralRevertsIfInsufficientHealthFactor() public {
+        vm.startPrank(alice);
+
+        // deposit collateral
+        uint256 collateralAmount = 0.5 ether;
+        weth.approve(address(sss), collateralAmount);
+        sss.depositCollateral(address(weth), collateralAmount);
+        assertEq(sss.totalCollateralValueInUSD(alice), 1000e18); // 1000 USD
+        // mint SSD - 1000 * 80% = 800
+        uint256 ssdAmount = 800e18;
+        sss.mintSSD(ssdAmount);
+
+        // health factor = 1e18
+        assertEq(sss.healthFactor(alice), 1e18);
+
+        // redeem collateral
+        uint256 redeemAmount = 0.25 ether;
+        vm.expectRevert(SimpleStablecoinSystem.InsufficientHealthFactor.selector);
+        sss.redeemCollateral(address(weth), redeemAmount);
+
+        vm.stopPrank();
+    }
 }
