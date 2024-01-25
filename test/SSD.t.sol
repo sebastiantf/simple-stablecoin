@@ -36,4 +36,12 @@ contract SSDTest is Test {
         assertEq(ssd.balanceOf(alice), 50);
         vm.stopPrank();
     }
+
+    function test_Owner() public {
+        assertEq(ssd.owner(), address(this));
+
+        ssd.transferOwnership(alice);
+
+        assertEq(ssd.owner(), alice);
+    }
 }
