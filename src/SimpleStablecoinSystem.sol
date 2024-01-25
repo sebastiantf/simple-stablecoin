@@ -90,21 +90,21 @@ contract SimpleStablecoinSystem {
         // if no SSD minted, health factor is max, else division by zero
         if (totalSSDMinted == 0) return type(uint256).max;
 
-        uint256 totalCollateralValueInUSD = totalCollateralValueInUSD(user);
+        uint256 _totalCollateralValueInUSD = totalCollateralValueInUSD(user);
         // health factor = (total collateral value in USD * liquidation threshold) / (total SSD value in USD)
         // adding 1e18 to keep precision after division with 1e18
-        return (((totalCollateralValueInUSD * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION) * 1e18) / totalSSDMinted;
+        return (((_totalCollateralValueInUSD * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION) * 1e18) / totalSSDMinted;
     }
 
     function totalCollateralValueInUSD(address user) public view returns (uint256) {
-        uint256 totalCollateralValueInUSD;
+        uint256 _totalCollateralValueInUSD;
         for (uint256 i = 0; i < supportedCollaterals.length; i++) {
             address collateral = supportedCollaterals[i];
             uint256 collateralBalance = collateralBalances[user][collateral];
             uint256 collateralValueInUSD = valueInUSD(collateral, collateralBalance);
-            totalCollateralValueInUSD += collateralValueInUSD;
+            _totalCollateralValueInUSD += collateralValueInUSD;
         }
-        return totalCollateralValueInUSD;
+        return _totalCollateralValueInUSD;
     }
 
     function valueInUSD(address token, uint256 amount) public view returns (uint256) {
