@@ -17,6 +17,7 @@ contract SSDTest is Test {
         weth.mint(alice, 1 ether);
     }
 
+    /* depositCollateral() */
     function test_depositCollateral() public {
         vm.startPrank(alice);
 
@@ -36,5 +37,11 @@ contract SSDTest is Test {
         assertEq(weth.balanceOf(address(sss)), 0.5 ether);
 
         vm.stopPrank();
+    }
+
+    function test_depositCollateralRevertsIfZero() public {
+        uint256 collateralAmount = 0;
+        vm.expectRevert(SimpleStablecoinSystem.MustBeGreaterThanZero.selector);
+        sss.depositCollateral(address(weth), collateralAmount);
     }
 }
