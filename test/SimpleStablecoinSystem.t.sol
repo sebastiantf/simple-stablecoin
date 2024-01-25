@@ -48,6 +48,11 @@ contract SSDTest is Test {
         assertEq(sss.priceFeeds(address(weth)), address(mockV3AggregatorWeth));
     }
 
+    function test_liquidationThreshold() public {
+        assertEq(sss.LIQUIDATION_THRESHOLD(), 80);
+        assertEq(sss.LIQUIDATION_PRECISION(), 100);
+    }
+
     /* depositCollateral() */
     function test_depositCollateral() public {
         vm.startPrank(alice);
@@ -129,6 +134,26 @@ contract SSDTest is Test {
         sss.depositCollateral(address(weth), collateralAmount);
 
         assertEq(sss.totalCollateralValueInUSD(alice), 2000e18);
+
+        vm.stopPrank();
+    }
+
+    /* healthFactor() */
+    function test_healthFactor() public {
+        vm.startPrank(alice);
+
+        // deposit collateral
+        uint256 collateralAmount = 0.5 ether;
+        weth.approve(address(sss), collateralAmount);
+        sss.depositCollateral(address(weth), collateralAmount);
+        assertEq(sss.totalCollateralValueInUSD(alice), 1000e18); // 1000 USD
+        // mint SSD - 1000 * 80% = 800
+        uint256 ssdAmount = 800e18;
+        sss.mintSSD(ssdAmount);
+
+        // (((totalCollateralValueInUSD * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION) * 1e18) / totalSSDMinted;
+        // (((1000 * 80) / 100) * 1e18) / 800 = 1e18
+        assertEq(sss.healthFactor(alice), 1e18);
 
         vm.stopPrank();
     }

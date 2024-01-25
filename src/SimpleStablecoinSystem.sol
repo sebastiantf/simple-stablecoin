@@ -16,6 +16,11 @@ contract SimpleStablecoinSystem {
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
     event SSDMinted(address indexed user, uint256 amount);
 
+    // Liquidation threshold is 80%
+    // If loan value raises above 80% of collateral value, the loan can be liquidated
+    uint256 public constant LIQUIDATION_THRESHOLD = 80;
+    uint256 public constant LIQUIDATION_PRECISION = 100;
+
     SimpleStablecoin public ssd;
     address[] public supportedCollaterals;
     mapping(address collateral => bool isSupported) public isCollateralSupported;
@@ -74,8 +79,10 @@ contract SimpleStablecoinSystem {
         // 1. get total collateral deposited in USD
         uint256 totalCollateralValueInUSD = totalCollateralValueInUSD(user);
         // 3. get total SSD minted
-        // 4. get value of total SSD minted in USD
+        uint256 totalSSDMinted = ssdMintedOf(user);
         // health factor = (total collateral value in USD * liquidation threshold) / (total SSD value in USD)
+        // adding 1e18 to keep precision after division with 1e18
+        return (((totalCollateralValueInUSD * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION) * 1e18) / totalSSDMinted;
     }
 
     function totalCollateralValueInUSD(address user) public view returns (uint256) {
