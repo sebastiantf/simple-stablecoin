@@ -72,6 +72,7 @@ contract SimpleStablecoinSystem {
 
     function redeemCollateral(address _collateral, uint256 _amount) external {
         collateralBalances[msg.sender][_collateral] -= _amount;
+        if (healthFactor(msg.sender) < 1e18) revert InsufficientHealthFactor();
         IERC20(_collateral).safeTransfer(msg.sender, _amount);
         emit CollateralRedeemed(msg.sender, _collateral, _amount);
     }
@@ -85,10 +86,11 @@ contract SimpleStablecoinSystem {
     }
 
     function healthFactor(address user) public view returns (uint256) {
-        // 1. get total collateral deposited in USD
-        uint256 totalCollateralValueInUSD = totalCollateralValueInUSD(user);
-        // 3. get total SSD minted
         uint256 totalSSDMinted = ssdMintedOf(user);
+        // if no SSD minted, health factor is max, else division by zero
+        if (totalSSDMinted == 0) return type(uint256).max;
+
+        uint256 totalCollateralValueInUSD = totalCollateralValueInUSD(user);
         // health factor = (total collateral value in USD * liquidation threshold) / (total SSD value in USD)
         // adding 1e18 to keep precision after division with 1e18
         return (((totalCollateralValueInUSD * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION) * 1e18) / totalSSDMinted;
