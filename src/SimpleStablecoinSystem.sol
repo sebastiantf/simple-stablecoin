@@ -15,6 +15,7 @@ contract SimpleStablecoinSystem {
     error InsufficientHealthFactor();
 
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
+    event CollateralRedeemed(address indexed user, address indexed collateral, uint256 amount);
     event SSDMinted(address indexed user, uint256 amount);
 
     // Liquidation threshold is 80%
@@ -67,6 +68,12 @@ contract SimpleStablecoinSystem {
         if (healthFactor(msg.sender) < 1e18) revert InsufficientHealthFactor();
         ssd.mint(msg.sender, _amount);
         emit SSDMinted(msg.sender, _amount);
+    }
+
+    function redeemCollateral(address _collateral, uint256 _amount) external {
+        collateralBalances[msg.sender][_collateral] -= _amount;
+        IERC20(_collateral).safeTransfer(msg.sender, _amount);
+        emit CollateralRedeemed(msg.sender, _collateral, _amount);
     }
 
     function collateralBalanceOf(address _user, address _collateral) public view returns (uint256) {

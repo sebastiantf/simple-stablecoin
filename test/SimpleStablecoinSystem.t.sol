@@ -9,6 +9,7 @@ import {MockV3Aggregator} from "./mocks/MockV3Aggregator.sol";
 
 contract SSDTest is Test {
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
+    event CollateralRedeemed(address indexed user, address indexed collateral, uint256 amount);
     event SSDMinted(address indexed user, uint256 amount);
 
     SimpleStablecoin public ssd;
@@ -175,6 +176,29 @@ contract SSDTest is Test {
         // (((totalCollateralValueInUSD * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION) * 1e18) / totalSSDMinted;
         // (((1000 * 80) / 100) * 1e18) / 800 = 1e18
         assertEq(sss.healthFactor(alice), 1e18);
+
+        vm.stopPrank();
+    }
+
+    /* redeemCollateral() */
+    function test_redeemCollateral() public {
+        vm.startPrank(alice);
+
+        // deposit collateral
+        uint256 collateralAmount = 0.5 ether;
+        weth.approve(address(sss), collateralAmount);
+        sss.depositCollateral(address(weth), collateralAmount);
+
+        // redeem collateral
+        uint256 redeemAmount = 0.25 ether;
+        vm.expectEmit(true, true, true, true);
+        emit CollateralRedeemed(alice, address(weth), redeemAmount);
+        sss.redeemCollateral(address(weth), redeemAmount);
+
+        // final balances
+        assertEq(sss.collateralBalanceOf(alice, address(weth)), 0.25 ether);
+        assertEq(weth.balanceOf(alice), 0.75 ether);
+        assertEq(weth.balanceOf(address(sss)), 0.25 ether);
 
         vm.stopPrank();
     }
