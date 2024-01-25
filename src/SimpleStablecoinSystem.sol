@@ -121,7 +121,18 @@ contract SimpleStablecoinSystem {
         // USD price feed has 8 decimals
         // We scale it to 18 decimals: 1e8 * 1e10 / 1e18 = 1e18
         // TODO: generalize precision
+        // token value in usd = price * amount
         return ((uint256(price) * 1e10) * amount) / 1e18;
+    }
+
+    function tokenFromUSD(address token, uint256 amount) public view returns (uint256) {
+        AggregatorV3Interface priceFeed = AggregatorV3Interface(priceFeeds[token]);
+        (, int256 price,,,) = priceFeed.latestRoundData();
+        // USD price feed has 8 decimals
+        // We scale it to 18 decimals: 1e18 * 1e18 / 1e18 = 1e18
+        // TODO: generalize precision
+        // token amount = amount / price
+        return (amount * 1e18) / (uint256(price) * 1e10);
     }
 
     function _revertIfInsufficientHealthFactor(address _user) internal view {

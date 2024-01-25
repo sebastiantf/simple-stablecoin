@@ -142,8 +142,8 @@ contract SSDTest is Test {
 
     /* valueInUSD() */
     function test_valueInUSD() public {
-        assertEq(sss.valueInUSD(address(weth), 1 ether), 2000e18);
-        assertEq(sss.valueInUSD(address(weth), 0.5 ether), 1000e18);
+        assertEq(sss.valueInUSD(address(weth), 1 ether), 2000e18); // 1 ETH = 2000 USD
+        assertEq(sss.valueInUSD(address(weth), 0.5 ether), 1000e18); // 0.5 ETH = 1000 USD
     }
 
     /* totalCollateralValueInUSD() */
@@ -271,5 +271,11 @@ contract SSDTest is Test {
         uint256 burnAmount = 0;
         vm.expectRevert(SimpleStablecoinSystem.MustBeGreaterThanZero.selector);
         sss.burnSSD(burnAmount);
+    }
+
+    /* tokenFromUSD() */
+    function test_tokenFromUSD() public {
+        assertEq(sss.tokenFromUSD(address(weth), 2000e18), 1 ether); // 2000 USD = 1 ETH
+        assertEq(sss.tokenFromUSD(address(weth), 1000e18), 0.5 ether); // 1000 USD = 0.5 ETH
     }
 }
