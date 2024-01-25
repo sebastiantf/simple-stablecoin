@@ -64,4 +64,12 @@ contract SimpleStablecoinSystem {
     function ssdMintedOf(address _user) public view returns (uint256) {
         return ssdMinted[_user];
     }
+
+    function healthFactor(address user) public view returns (uint256) {
+        // 1. get total collateral deposited
+        // 2. get value of total collateral deposited in USD
+        // 3. get total SSD minted
+        // 4. get value of total SSD minted in USD
+        // health factor = (total collateral value in USD * liquidation threshold) / (total SSD value in USD)
+    }
 }
