@@ -16,6 +16,7 @@ contract SimpleStablecoinSystem {
     event SSDMinted(address indexed user, uint256 amount);
 
     SimpleStablecoin public ssd;
+    address[] public supportedCollaterals;
     mapping(address collateral => bool isSupported) public isCollateralSupported;
     mapping(address user => mapping(address collateral => uint256 collateralBalance)) internal collateralBalances;
     mapping(address user => uint256 ssdMinted) internal ssdMinted;
@@ -36,6 +37,7 @@ contract SimpleStablecoinSystem {
 
     constructor(SimpleStablecoin _ssd, address[] memory _collaterals) {
         ssd = _ssd;
+        supportedCollaterals = _collaterals;
         for (uint256 i = 0; i < _collaterals.length; i++) {
             isCollateralSupported[_collaterals[i]] = true;
         }

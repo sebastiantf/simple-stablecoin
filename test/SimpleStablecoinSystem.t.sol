@@ -36,6 +36,10 @@ contract SSDTest is Test {
         assertEq(sss.isCollateralSupported(address(weth)), true);
     }
 
+    function test_supportedCollaterals() public {
+        assertEq(sss.supportedCollaterals(0), address(weth));
+    }
+
     /* depositCollateral() */
     function test_depositCollateral() public {
         vm.startPrank(alice);
