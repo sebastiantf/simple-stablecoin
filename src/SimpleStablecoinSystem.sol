@@ -18,6 +18,7 @@ contract SimpleStablecoinSystem {
     SimpleStablecoin public ssd;
     address[] public supportedCollaterals;
     mapping(address collateral => bool isSupported) public isCollateralSupported;
+    mapping(address collateral => address priceFeed) public priceFeeds;
     mapping(address user => mapping(address collateral => uint256 collateralBalance)) internal collateralBalances;
     mapping(address user => uint256 ssdMinted) internal ssdMinted;
 
@@ -35,10 +36,11 @@ contract SimpleStablecoinSystem {
         _;
     }
 
-    constructor(SimpleStablecoin _ssd, address[] memory _collaterals) {
+    constructor(SimpleStablecoin _ssd, address[] memory _collaterals, address[] memory _priceFeeds) {
         ssd = _ssd;
         supportedCollaterals = _collaterals;
         for (uint256 i = 0; i < _collaterals.length; i++) {
+            priceFeeds[_collaterals[i]] = _priceFeeds[i];
             isCollateralSupported[_collaterals[i]] = true;
         }
     }

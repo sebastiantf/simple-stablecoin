@@ -13,15 +13,18 @@ contract SSDTest is Test {
     SimpleStablecoin public ssd;
     SimpleStablecoinSystem public sss;
     ERC20Mock public weth = new ERC20Mock();
+    address mockV3Aggregator = makeAddr("mockV3Aggregator");
 
     address alice = makeAddr("alice");
 
     function setUp() public {
         address[] memory collaterals = new address[](1);
+        address[] memory priceFeeds = new address[](1);
         collaterals[0] = address(weth);
+        priceFeeds[0] = address(mockV3Aggregator);
 
         ssd = new SimpleStablecoin();
-        sss = new SimpleStablecoinSystem(ssd, collaterals);
+        sss = new SimpleStablecoinSystem(ssd, collaterals, priceFeeds);
 
         ssd.transferOwnership(address(sss));
 
@@ -38,6 +41,10 @@ contract SSDTest is Test {
 
     function test_supportedCollaterals() public {
         assertEq(sss.supportedCollaterals(0), address(weth));
+    }
+
+    function test_priceFeeds() public {
+        assertEq(sss.priceFeeds(address(weth)), address(mockV3Aggregator));
     }
 
     /* depositCollateral() */
