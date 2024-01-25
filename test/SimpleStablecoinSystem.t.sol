@@ -2,12 +2,14 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
+import {SimpleStablecoin} from "../src/SimpleStablecoin.sol";
 import {SimpleStablecoinSystem} from "../src/SimpleStablecoinSystem.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 
 contract SSDTest is Test {
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
 
+    SimpleStablecoin public ssd;
     SimpleStablecoinSystem public sss;
     ERC20Mock public weth = new ERC20Mock();
 
@@ -17,7 +19,10 @@ contract SSDTest is Test {
         address[] memory collaterals = new address[](1);
         collaterals[0] = address(weth);
 
+        ssd = new SimpleStablecoin();
         sss = new SimpleStablecoinSystem(collaterals);
+
+        ssd.transferOwnership(address(sss));
 
         weth.mint(alice, 1 ether);
     }
