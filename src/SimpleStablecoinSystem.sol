@@ -109,13 +109,13 @@ contract SimpleStablecoinSystem {
         for (uint256 i = 0; i < supportedCollaterals.length; i++) {
             address collateral = supportedCollaterals[i];
             uint256 collateralBalance = collateralBalances[user][collateral];
-            uint256 collateralValueInUSD = valueInUSD(collateral, collateralBalance);
+            uint256 collateralValueInUSD = tokenToUSD(collateral, collateralBalance);
             _totalCollateralValueInUSD += collateralValueInUSD;
         }
         return _totalCollateralValueInUSD;
     }
 
-    function valueInUSD(address token, uint256 amount) public view returns (uint256) {
+    function tokenToUSD(address token, uint256 amount) public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(priceFeeds[token]);
         (, int256 price,,,) = priceFeed.latestRoundData();
         // USD price feed has 8 decimals
