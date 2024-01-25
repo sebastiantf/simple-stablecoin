@@ -8,4 +8,8 @@ contract MockV3Aggregator {
         // return 2000 USD / ETH
         return (0, price, 0, 0, 0);
     }
+
+    function setPrice(int256 _price) external {
+        price = _price;
+    }
 }
