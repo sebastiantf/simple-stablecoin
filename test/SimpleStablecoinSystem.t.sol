@@ -12,9 +12,16 @@ contract SSDTest is Test {
     address alice = makeAddr("alice");
 
     function setUp() public {
-        sss = new SimpleStablecoinSystem();
+        address[] memory collaterals = new address[](1);
+        collaterals[0] = address(weth);
+
+        sss = new SimpleStablecoinSystem(collaterals);
 
         weth.mint(alice, 1 ether);
+    }
+
+    function test_supportedCollaterals() public {
+        assertEq(sss.supportedCollaterals(address(weth)), true);
     }
 
     /* depositCollateral() */

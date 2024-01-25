@@ -9,6 +9,7 @@ contract SimpleStablecoinSystem {
 
     error MustBeGreaterThanZero();
 
+    mapping(address collateral => bool isSupported) public supportedCollaterals;
     mapping(address user => mapping(address collateral => uint256 collateralBalance)) internal collateralBalances;
 
     modifier GreaterThanZero(uint256 _amount) {
@@ -16,6 +17,12 @@ contract SimpleStablecoinSystem {
             revert MustBeGreaterThanZero();
         }
         _;
+    }
+
+    constructor(address[] memory _collaterals) {
+        for (uint256 i = 0; i < _collaterals.length; i++) {
+            supportedCollaterals[_collaterals[i]] = true;
+        }
     }
 
     function depositCollateral(address _collateral, uint256 _amount) external GreaterThanZero(_amount) {
