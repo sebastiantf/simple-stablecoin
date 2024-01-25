@@ -278,4 +278,28 @@ contract SSDTest is Test {
         assertEq(sss.tokenFromUSD(address(weth), 2000e18), 1 ether); // 2000 USD = 1 ETH
         assertEq(sss.tokenFromUSD(address(weth), 1000e18), 0.5 ether); // 1000 USD = 0.5 ETH
     }
+
+    /* liquidate() */
+    function test_liquidateRevertsIfSufficientHealthFactor() public {
+        vm.startPrank(alice);
+
+        // deposit collateral
+        uint256 collateralAmount = 0.5 ether;
+        weth.approve(address(sss), collateralAmount);
+        sss.depositCollateral(address(weth), collateralAmount);
+        assertEq(sss.totalCollateralValueInUSD(alice), 1000e18); // 1000 USD
+        // mint SSD - 1000 * 80% = 800
+        uint256 ssdAmount = 800e18;
+        sss.mintSSD(ssdAmount);
+
+        // health factor = 1e18
+        assertEq(sss.healthFactor(alice), 1e18);
+
+        // liquidate
+        uint256 liquidateAmount = 0.25 ether;
+        vm.expectRevert(SimpleStablecoinSystem.SufficientHealthFactor.selector);
+        sss.liquidate(alice, address(weth), liquidateAmount);
+
+        vm.stopPrank();
+    }
 }

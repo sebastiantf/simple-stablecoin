@@ -13,6 +13,7 @@ contract SimpleStablecoinSystem {
     error MustBeGreaterThanZero();
     error UnsupportedCollateral();
     error InsufficientHealthFactor();
+    error SufficientHealthFactor();
 
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
     event CollateralRedeemed(address indexed user, address indexed collateral, uint256 amount);
@@ -83,6 +84,10 @@ contract SimpleStablecoinSystem {
         _revertIfInsufficientHealthFactor(msg.sender); // probably not needed
         ssd.burnFrom(msg.sender, _amount);
         emit SSDBurned(msg.sender, _amount);
+    }
+
+    function liquidate(address _user, address _collateral, uint256 _ssdAmount) external {
+        if (healthFactor(_user) >= 1e18) revert SufficientHealthFactor();
     }
 
     function collateralBalanceOf(address _user, address _collateral) public view returns (uint256) {
