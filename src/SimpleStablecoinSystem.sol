@@ -12,6 +12,7 @@ contract SimpleStablecoinSystem {
 
     error MustBeGreaterThanZero();
     error UnsupportedCollateral();
+    error InsufficientHealthFactor();
 
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
     event SSDMinted(address indexed user, uint256 amount);
@@ -63,6 +64,7 @@ contract SimpleStablecoinSystem {
 
     function mintSSD(uint256 _amount) external {
         ssdMinted[msg.sender] += _amount;
+        if (healthFactor(msg.sender) < 1e18) revert InsufficientHealthFactor();
         ssd.mint(msg.sender, _amount);
         emit SSDMinted(msg.sender, _amount);
     }
