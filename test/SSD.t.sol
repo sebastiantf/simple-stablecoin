@@ -25,6 +25,18 @@ contract SSDTest is Test {
         assertEq(ssd.balanceOf(alice), 100);
     }
 
+    function test_OnlyOwnerCanMint() public {
+        assertEq(ssd.balanceOf(alice), 0);
+
+        ssd.mint(alice, 100);
+        assertEq(ssd.balanceOf(alice), 100);
+
+        vm.startPrank(alice);
+        vm.expectRevert();
+        ssd.mint(alice, 100);
+        vm.stopPrank();
+    }
+
     function test_Burn() public {
         assertEq(ssd.balanceOf(alice), 0);
 

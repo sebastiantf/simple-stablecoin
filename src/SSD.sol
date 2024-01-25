@@ -8,7 +8,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 contract SimpleStablecoin is ERC20, ERC20Burnable, Ownable {
     constructor() ERC20("SimpleStablecoin", "SSD") Ownable(msg.sender) {}
 
-    function mint(address to, uint256 amount) external {
+    function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
     }
 }
