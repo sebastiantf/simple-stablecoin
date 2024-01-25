@@ -8,6 +8,7 @@ import {ERC20Mock} from "@openzeppelin/contracts/mocks/token/ERC20Mock.sol";
 
 contract SSDTest is Test {
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
+    event SSDMinted(address indexed user, uint256 amount);
 
     SimpleStablecoin public ssd;
     SimpleStablecoinSystem public sss;
@@ -70,5 +71,26 @@ contract SSDTest is Test {
         uint256 collateralAmount = 0.5 ether;
         vm.expectRevert(SimpleStablecoinSystem.UnsupportedCollateral.selector);
         sss.depositCollateral(address(unsupported), collateralAmount);
+    }
+
+    /* mintSSD() */
+    function test_mintSSD() public {
+        vm.startPrank(alice);
+
+        // initial balances
+        assertEq(sss.ssdMintedOf(alice), 0);
+        assertEq(ssd.balanceOf(alice), 0);
+
+        // mint SSD
+        uint256 ssdAmount = 100;
+        vm.expectEmit(true, true, true, true);
+        emit SSDMinted(alice, ssdAmount);
+        sss.mintSSD(ssdAmount);
+
+        // final balances
+        assertEq(sss.ssdMintedOf(alice), ssdAmount);
+        assertEq(ssd.balanceOf(alice), ssdAmount);
+
+        vm.stopPrank();
     }
 }

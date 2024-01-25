@@ -13,10 +13,12 @@ contract SimpleStablecoinSystem {
     error UnsupportedCollateral();
 
     event CollateralDeposited(address indexed user, address indexed collateral, uint256 amount);
+    event SSDMinted(address indexed user, uint256 amount);
 
     SimpleStablecoin public ssd;
     mapping(address collateral => bool isSupported) public supportedCollaterals;
     mapping(address user => mapping(address collateral => uint256 collateralBalance)) internal collateralBalances;
+    mapping(address user => uint256 ssdMinted) internal ssdMinted;
 
     modifier GreaterThanZero(uint256 _amount) {
         if (_amount <= 0) {
@@ -49,7 +51,17 @@ contract SimpleStablecoinSystem {
         emit CollateralDeposited(msg.sender, _collateral, _amount);
     }
 
+    function mintSSD(uint256 _amount) external {
+        ssdMinted[msg.sender] += _amount;
+        ssd.mint(msg.sender, _amount);
+        emit SSDMinted(msg.sender, _amount);
+    }
+
     function collateralBalanceOf(address _user, address _collateral) public view returns (uint256) {
         return collateralBalances[_user][_collateral];
+    }
+
+    function ssdMintedOf(address _user) public view returns (uint256) {
+        return ssdMinted[_user];
     }
 }
