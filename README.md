@@ -1,66 +1,13 @@
-## Foundry
+## Simple Stablecoin
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+> ### 🚨 Code is not audited. Do not use in production
 
-Foundry consists of:
+**Simple Stablecoin is a simple stablecoin 😆**
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+Seriously, it's a stablecoin that uses **Collateralized Debt Positions (CDP)** to mint and maintain the peg stability of the stablecoin.
 
-## Documentation
+CDPs are essentially similar to a simple lending protocol that allows you to deposit collateral and borrow stablecoins against it. The collateral is **over-collateralized** to ensure that the stablecoin is always backed by more than 100% of the value of the stablecoin in circulation.
 
-https://book.getfoundry.sh/
+A **liquidation threshold** of 80% is set to ensure that the collateral is always over-collateralized. If the value of the loan rises above 80% of the value of the stablecoin borrowed, collateral will be liquidated to repay part of the loan to bring health factor back up.
 
-## Usage
-
-### Build
-
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+Simple Stablecoin uses **Chainlink price feeds** to determine the value of the collateral and uses them to stabilize the peg of the stablecoin to USD.
